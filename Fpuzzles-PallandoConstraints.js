@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Fpuzzles-PallandoConstraints
 // @namespace    http://tampermonkey.net/
-// @version      1.1
-// @description  Adds Clock lines and Weak Palindrome lines constraints to f-puzzles.
+// @version      1.0
+// @description  Adds LockoutLines constraint to f-puzzles.
 // @author       Kittiaara
 // @match        https://*.f-puzzles.com/*
 // @match        https://f-puzzles.com/*
@@ -13,8 +13,6 @@
 
 (function() {
     'use strict';
-
-    // based on newConstraints script written by Rangsk (https://gist.github.com/dclamage/3d76a56c9153a8546888a31d65765cb7)
 
     // Adding a new constraint:
     // 1. Add a new entry to the newConstraintInfo array
@@ -58,7 +56,20 @@
             ],
 			constraintType: 'isWeakPalindromeConstraint'
         },
-    ]
+		{
+			name: 'Sweeper Cell',
+			type: 'cellcage',
+			color: '#000000FE',
+			colorDark: '#FFFFFFFE',
+			tooltip: [
+				'Sweeper Cell Constraint',
+				'',
+                'Click to add a sweeper cell.',
+                'Click on a sweeper cell to remove it.',
+            ],
+			constraintType: 'isSweeperCell',
+		}
+    ];
 
     const doShim = function() {
         // Additional import/export data
@@ -72,6 +83,20 @@
                 const id = cID(constraintInfo.name);
                 const puzzleEntry = puzzle[id];
                 if (puzzleEntry && puzzleEntry.length > 0) {
+					if (constraintInfo.type === 'cellcage') {
+                        if (!puzzle.cage)
+                            puzzle.cage = [];
+						for (let instance of puzzleEntry) {
+							const cageText = {
+								"cells": instance.cells,
+								"value": "",
+								"outlineC": constraintInfo.color,
+								"fontC": constraintInfo.color
+							}
+							cageText[constraintInfo.constraintType] = true;
+							puzzle.cage.push(cageText);
+						}
+					}
                     if (constraintInfo.type === 'line') {
                         if (!puzzle.line) {
                             puzzle.line = [];
@@ -137,9 +162,15 @@
                 }
             }
             if (puzzle.circle) {
-                puzzle.circle = puzzle.circle.filter(line => !(line.isClockConstraint || line.isWeakPalindromeConstraint));
+                puzzle.circle = puzzle.circle.filter(circle => !circle.isWeakPalindromeConstraint);
                 if (puzzle.circle.length === 0) {
                     delete puzzle.circle;
+                }
+            }
+            if (puzzle.cage) {
+                puzzle.cage = puzzle.cage.filter(cage => !cage.isSweeperCell);
+                if (puzzle.cage.length === 0) {
+                    delete puzzle.cage;
                 }
             }
             string = compressor.compressToBase64(JSON.stringify(puzzle));
@@ -219,6 +250,12 @@
                 }
             }
 
+			// Sweeper cells
+			const constraintsSCell = constraints[cID('Sweeper Cell')];
+			if (constraintsSCell  && constraintsSCell.length > 0)  {
+				//TODO: Implement conflict highlighting
+			}
+
             return true;
         }
 
@@ -255,13 +292,26 @@
 				centreX /= cells.length;
 				centreY /= cells.length;
 			}
-			
+
 			ctx.fillStyle =  boolSettings['Dark Mode']? colorDark : color;
 			ctx.strokeStyle = boolSettings['Dark Mode']? colorDark : color;
 			ctx.beginPath();
 			ctx.arc(centreX,centreY,radius,0,2*Math.PI,false);
 			ctx.fill();
 			ctx.stroke();
+		}
+
+		const drawCage = function(cell, color, colorDark, value) {
+			ctx.lineWidth = lineWT;
+			ctx.strokeStyle = boolSettings['Dark Mode'] ? colorDark : color;
+			ctx.setLineDash([(cellSL * 0.44) / 3.5, (cellSL * 0.44) / 3.5]);
+			ctx.strokeRect(cell.x, cell.y, cell.x + (cellSL*.44), cell.y + (cellSL*.44));
+			ctx.fillStyle = boolSettings['Dark Mode'] ? '#F0F0F0' : '#000000';
+			ctx.font = (cellSL * 0.18) + 'px Verdana';
+			ctx.textAlign = 'left';
+			ctx.fillText(value, cell.x + (cellSL * 0.111), cell.y + (cellSL * 0.2468));
+			ctx.textAlign = 'center';
+			ctx.setLineDash([]);
 		}
 
         // Constraint classes
@@ -312,6 +362,23 @@
             }
         }
 
+		// Sweeper Cell
+		window.sweepercell = function(cell) {
+			this.cell = [ [cell] ];
+
+			this.show = function() {
+				const sCellInfo = newConstraintInfo.filter(c => c.name === 'Sweeper Cell')[0];
+				drawCage(this.cell[0],sCellInfo.color,sCellInfo.colorDark,this.value);
+			}
+
+			this.type = function(ch){
+				let types = 'DEHLOPST';
+				if ( types.includes(ch) ) {
+					this.value = ch;
+				}
+			}
+		}
+
         const origCategorizeTools = categorizeTools;
         categorizeTools = function() {
             origCategorizeTools();
@@ -342,7 +409,7 @@
         // Tooltips
         for (let info of newConstraintInfo) {
             descriptions[info.name] = info.tooltip;
-        }		
+        }
 
     }
 
