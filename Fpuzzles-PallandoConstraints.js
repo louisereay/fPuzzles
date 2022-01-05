@@ -109,7 +109,7 @@ const doShim = function() {
               "cells": [instance.cell],
               "value": instance.value,
               "outlineC": "#00000002",
-              "fontC": "#00000002"
+              "fontC": "#000000FE"
             };
             let rectangleText =  {
               "cells": [instance.cell],
@@ -425,10 +425,10 @@ const doShim = function() {
 //    ctx.setLineDash([(cellSL * 0.44) / 3.5, (cellSL * 0.44) / 3.5]);
     ctx.strokeRect(startX, startY, cellSL*.85, cellSL*.85);
     ctx.fillStyle = boolSettings['Dark Mode'] ? colorDark : color;
-    ctx.font = (cellSL * 0.18) + 'px Verdana';
-    ctx.textAlign = 'left';
-    ctx.fillText(value, cell.x + (cellSL * 0.111), cell.y + (cellSL * 0.2468));
-    ctx.textAlign = 'center';
+    // ctx.font = (cellSL * 0.18) + 'px Verdana';
+    // ctx.textAlign = 'left';
+    // ctx.fillText(value, cell.x + (cellSL * 0.111), cell.y + (cellSL * 0.2468));
+    // ctx.textAlign = 'center';
     ctx.setLineDash([]);
   }
 
