@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Fpuzzles-PallandoConstraintsTest
+// @name         Fpuzzles-PallandoConstraints
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Adds LockoutLines constraint to f-puzzles.
+// @version      1.1
+// @description  Adds Clockline, Weak Palindrome Line and Sweepercell constraints to Fpuzzles
 // @author       Kittiaara
 // @match        https://*.f-puzzles.com/*
 // @match        https://f-puzzles.com/*
@@ -64,12 +64,14 @@ const newCellConstraintInfo = [{
   color: '#000000FE',
   colorDark: '#FFFFFFFE',
   tooltip: [
-    'Sweeper Cell Constraint',
+    "The digit inside a sweeper square says how many of digits within a king's ",
+    'move of it (including itself) match the condition the square is labeled with.',
     'Type a number to add a constraint type:',
-    ' 1: Evens (2468)    2: Fibinacci Numbers (12358)',
-    ' 3: Highs (56789)   4: Lows (1234)',
-    ' 5: Odds (13579)    6: Primes (2357)',
-    ' 7: Squares (149)   8: Triangles (136)',
+    ' 1: Doubles (1248)             2: Evens (2468)',
+    ' 3: Fibinacci Numbers (12358)  4: Highs (56789)',
+    ' 5: Lows (1234)                6: Odds (13579)',
+    ' 7: Primes (2357)              8: Squares (149)',
+    ' 9: Triangles (136)',
     '',
     'Click to add a sweeper cell.',
     'Click on a sweeper cell to remove it.',
@@ -296,6 +298,8 @@ const doShim = function() {
         return [1,4,9];
         case 'T':
         return [1,3,6];
+        case 'D':
+        return [1,2,4,8];
         default:
         return [];
       }
@@ -327,15 +331,15 @@ const doShim = function() {
     }
 
     const isInGrid = function(i,j) {
-      if ((i < 0) || (i >size)) return false;
-      if ((j < 0) || (j >size)) return false;
+      if ((i < 0) || (i >= size)) return false;
+      if ((j < 0) || (j >= size)) return false;
       return true;
     }
 
     const constraintsSCell = constraints[cID('Sweeper Cell')];
     if (constraintsSCell  && constraintsSCell.length > 0)  {
       for (let scell of constraintsSCell)  {
-        if (scell.cell.value && scell.value && (scell.cell===cell)) {
+        if (scell && (scell.cell===cell) && scell.cell.value && scell.value) {
           let validDigits = getValidDigits(scell.value);
           // get the valid digits to be in surrounding cells
           // get number of possible matches in surrounding cells
@@ -483,8 +487,8 @@ const doShim = function() {
     }
 
     this.typeNumber = function(num){
-      let types = 'EFHLOPST';
-      if((parseInt(num) > 0) && (parseInt(num) < 9)) {
+      let types = 'DEFHLOPST';
+      if((parseInt(num) > 0)) {
         index = parseInt(num) - 1;
         this.value = types.substring(index,index+1);
       }
