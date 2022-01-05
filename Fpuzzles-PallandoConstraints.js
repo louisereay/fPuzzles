@@ -88,14 +88,6 @@ const doShim = function() {
     const compressed = origExportPuzzle(includeCandidates);
     const puzzle = JSON.parse(compressor.decompressFromBase64(compressed));
 
-    // remove Sweepercell cages before writing the JSON
-    if (puzzle.cage) {
-      puzzle.cage = puzzle.cage.filter(cage => !(cage.outlineC == "#00000002"));
-      if (puzzle.cage.length === 0) {
-        delete puzzle.cage;
-      }
-    }
-
     // Add cosmetic version of constraints for those not using the solver plugin
     for (let constraintInfo of newConstraintInfo) {
       const id = cID(constraintInfo.name);
@@ -109,7 +101,7 @@ const doShim = function() {
               "cells": [instance.cell],
               "value": instance.value,
               "outlineC": "#00000002",
-              "fontC": "#000000FE"
+              "fontC": constraintInfo.color,
             };
             let rectangleText =  {
               "cells": [instance.cell],
@@ -119,6 +111,7 @@ const doShim = function() {
               "width": 0.85,
               "height": 0.85
             };
+            cageText[constraintInfo.constraintType] = true;
             rectangleText[constraintInfo.constraintType] = true;
             puzzle.cage.push(cageText);
             puzzle.rectangle.push(rectangleText);
@@ -194,12 +187,12 @@ const doShim = function() {
         delete puzzle.circle;
       }
     }
-    // if (puzzle.cage) {
-    //   puzzle.cage = puzzle.cage.filter(cage => !cage.isSweeperCell);
-    //   if (puzzle.cage.length === 0) {
-    //     delete puzzle.cage;
-    //   }
-    // }
+    if (puzzle.cage) {
+      puzzle.cage = puzzle.cage.filter(cage => !cage.isSweeperCell);
+      if (puzzle.cage.length === 0) {
+        delete puzzle.cage;
+      }
+    }
     if (puzzle.rectangle) {
       puzzle.rectangle = puzzle.rectangle.filter(rectangle => !rectangle.isSweeperCell);
       if (puzzle.rectangle.length === 0) {
@@ -425,10 +418,10 @@ const doShim = function() {
 //    ctx.setLineDash([(cellSL * 0.44) / 3.5, (cellSL * 0.44) / 3.5]);
     ctx.strokeRect(startX, startY, cellSL*.85, cellSL*.85);
     ctx.fillStyle = boolSettings['Dark Mode'] ? colorDark : color;
-    // ctx.font = (cellSL * 0.18) + 'px Verdana';
-    // ctx.textAlign = 'left';
-    // ctx.fillText(value, cell.x + (cellSL * 0.111), cell.y + (cellSL * 0.2468));
-    // ctx.textAlign = 'center';
+    ctx.font = (cellSL * 0.18) + 'px Verdana';
+    ctx.textAlign = 'left';
+    ctx.fillText(value, cell.x + (cellSL * 0.44), cell.y + (cellSL * 0.2468));
+    ctx.textAlign = 'center';
     ctx.setLineDash([]);
   }
 
