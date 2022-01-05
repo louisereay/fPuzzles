@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FPuzzles-multi-column-constraints
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.01
 // @description  Implement a multi-column constraints selection box in f-puzzles
 // @author       Kittiaara
 // @match        https://*.f-puzzles.com/*
@@ -24,7 +24,6 @@
             var x = gridX - (sidebarDist + sidebarW/2);
             var y = gridY;
             var width = sidebarW;
-            log("createSidebarConstraint");
 
             const sb = new sidebar(x, ['Setting']);
             sidebars.push(sb);
