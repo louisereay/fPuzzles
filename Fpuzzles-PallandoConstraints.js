@@ -415,14 +415,14 @@ const doShim = function() {
     let startY = cell.y + (cellSL*.075);
     ctx.lineWidth = lineWT;
     ctx.strokeStyle = boolSettings['Dark Mode'] ? colorDark : color;
-//    ctx.setLineDash([(cellSL * 0.44) / 3.5, (cellSL * 0.44) / 3.5]);
     ctx.strokeRect(startX, startY, cellSL*.85, cellSL*.85);
     ctx.fillStyle = boolSettings['Dark Mode'] ? colorDark : color;
-    ctx.font = (cellSL * 0.18) + 'px Verdana';
-    ctx.textAlign = 'left';
-    ctx.fillText(value, cell.x + (cellSL * 0.44), cell.y + (cellSL * 0.2468));
+    ctx.font = (cellSL * 0.2) + 'px Verdana';
     ctx.textAlign = 'center';
-    ctx.setLineDash([]);
+    ctx.fillText(value, cell.x + (cellSL * 0.5), cell.y + (cellSL * 0.26));
+    ctx.fillText(value, cell.x + (cellSL * 0.5), cell.y + (cellSL * 0.85));
+    ctx.fillText(value, cell.x + (cellSL * 0.18), cell.y + (cellSL * 0.55));
+    ctx.fillText(value, cell.x + (cellSL * 0.82), cell.y + (cellSL * 0.55));
   }
 
   // Constraint classes
