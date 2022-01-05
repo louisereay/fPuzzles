@@ -61,17 +61,16 @@
 const newCellConstraintInfo = [{
   name: 'Sweeper Cell',
   type: 'sweeper',
-  color: '#000000FE',
+  color: '#651010FE',
   colorDark: '#FFFFFFFE',
   tooltip: [
     "The digit inside a sweeper square says how many of digits within a king's ",
     'move of it (including itself) match the condition the square is labeled with.',
     'Type a number to add a constraint type:',
-    ' 1: Doubles (1248)             2: Evens (2468)',
-    ' 3: Fibinacci Numbers (12358)  4: Highs (56789)',
-    ' 5: Lows (1234)                6: Odds (13579)',
-    ' 7: Primes (2357)              8: Squares (149)',
-    ' 9: Triangles (136)',
+    '',
+    ' 1: Doubles (1248)   2: Evens (2468)    3: Fibonacci (12358)',
+    ' 4: Highs (56789)    5: Lows (1234)      6: Odds (13579)',
+    ' 7: Primes (2357)     8: Squares (149)   9: Triangles (136)',
     '',
     'Click to add a sweeper cell.',
     'Click on a sweeper cell to remove it.',
@@ -89,6 +88,14 @@ const doShim = function() {
     const compressed = origExportPuzzle(includeCandidates);
     const puzzle = JSON.parse(compressor.decompressFromBase64(compressed));
 
+    // remove Sweepercell cages before writing the JSON
+    if (puzzle.cage) {
+      puzzle.cage = puzzle.cage.filter(cage => !(cage.outlineC == "#00000002"));
+      if (puzzle.cage.length === 0) {
+        delete puzzle.cage;
+      }
+    }
+
     // Add cosmetic version of constraints for those not using the solver plugin
     for (let constraintInfo of newConstraintInfo) {
       const id = cID(constraintInfo.name);
@@ -101,8 +108,8 @@ const doShim = function() {
             let cageText = {
               "cells": [instance.cell],
               "value": instance.value,
-              "outlineC": "#00000000",
-              "fontC": constraintInfo.color
+              "outlineC": "#00000002",
+              "fontC": "#00000002"
             };
             let rectangleText =  {
               "cells": [instance.cell],
@@ -112,7 +119,6 @@ const doShim = function() {
               "width": 0.85,
               "height": 0.85
             };
-            cageText[constraintInfo.constraintType] = true;
             rectangleText[constraintInfo.constraintType] = true;
             puzzle.cage.push(cageText);
             puzzle.rectangle.push(rectangleText);
@@ -188,12 +194,12 @@ const doShim = function() {
         delete puzzle.circle;
       }
     }
-    if (puzzle.cage) {
-      puzzle.cage = puzzle.cage.filter(cage => !cage.isSweeperCell);
-      if (puzzle.cage.length === 0) {
-        delete puzzle.cage;
-      }
-    }
+    // if (puzzle.cage) {
+    //   puzzle.cage = puzzle.cage.filter(cage => !cage.isSweeperCell);
+    //   if (puzzle.cage.length === 0) {
+    //     delete puzzle.cage;
+    //   }
+    // }
     if (puzzle.rectangle) {
       puzzle.rectangle = puzzle.rectangle.filter(rectangle => !rectangle.isSweeperCell);
       if (puzzle.rectangle.length === 0) {
