@@ -476,12 +476,16 @@ const doShim = function() {
     ctx.fill();
   }
 
-  const drawDot = function(cells, color, colorDark, lineWidth) {
+  const drawDottedLine = function(line, cells, color, colorDark, lineWidth) {
     const radius = cellSL * lineWidth * 0.25;
-    // calculate midpoint
-    let centreX = 0;
-    let centreY = 0;
+
+    drawLine(line, color, colorDark, lineWidth);
+
+    // Draw dot
     if (cells.length > 0) {
+      // calculate midpoint
+      let centreX = 0;
+      let centreY = 0;
       let halfWidth = cellSL * 0.5;
       for ( let cell of cells ) {
         centreX += cell.x + halfWidth;
@@ -489,14 +493,12 @@ const doShim = function() {
       }
       centreX /= cells.length;
       centreY /= cells.length;
-    }
 
-    ctx.fillStyle =  boolSettings['Dark Mode']? colorDark : color;
-    ctx.strokeStyle = boolSettings['Dark Mode']? colorDark : color;
-    ctx.beginPath();
-    ctx.arc(centreX,centreY,radius,0,2*Math.PI,false);
-    ctx.fill();
-    ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(centreX,centreY,radius,0,2*Math.PI,false);
+      ctx.fill();
+      ctx.stroke();
+    }
   }
 
   const drawSweep = function(cell, color, colorDark, value) {
@@ -545,15 +547,15 @@ const doShim = function() {
       const wpalInfo = newConstraintInfo.filter(c => c.name === weakPalindromeName)[0];
       for (var a = 0; a < this.lines.length; a++) {
         const line = this.lines[a];
-        drawLine(line, wpalInfo.color, wpalInfo.colorDark, wpalInfo.lineWidth);
+        let cells = [];
         if (line.length > 1) {
           // draw a dot at the midpoint of the line
-          let cells = [ line[Math.floor((line.length-1)/2)] ];
+          cells.push(line[Math.floor((line.length-1)/2)]);
           if ((line.length%2)==0) {
             cells.push(line[Math.ceil((line.length-1)/2)])
           }
-          drawDot(cells, wpalInfo.color, wpalInfo.colorDark, wpalInfo.lineWidth);
         }
+        drawDottedLine(line, cells, wpalInfo.color, wpalInfo.colorDark, wpalInfo.lineWidth);
       }
     }
 

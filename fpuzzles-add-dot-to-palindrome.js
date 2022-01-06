@@ -16,22 +16,7 @@
 
   const updateConstraint = function() {
 
-    const drawDottedLine = function(line, cells, color, colorDark, lineWidth) {
-      const radius = cellSL * lineWidth * 0.25;
-
-      // calculate midpoint
-      let centreX = 0;
-      let centreY = 0;
-      if (cells.length > 0) {
-        let halfWidth = cellSL * 0.5;
-        for ( let cell of cells ) {
-          centreX += cell.x + halfWidth;
-          centreY += cell.y + halfWidth;
-        }
-        centreX /= cells.length;
-        centreY /= cells.length;
-      }
-
+    const drawLine = function(line, color, colorDark, lineWidth) {
       ctx.lineWidth = cellSL * lineWidth * 0.5;
       ctx.fillStyle = boolSettings['Dark Mode'] ? colorDark : color;
       ctx.strokeStyle = boolSettings['Dark Mode'] ? colorDark : color;
@@ -47,7 +32,26 @@
       ctx.beginPath();
       ctx.arc(line[line.length - 1].x + cellSL / 2, line[line.length - 1].y + cellSL / 2, ctx.lineWidth / 2, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    const drawDottedLine = function(line, cells, color, colorDark, lineWidth) {
+      const radius = cellSL * lineWidth * 0.25;
+
+      drawLine(line, color, colorDark, lineWidth);
+
+      // Draw dot
       if (cells.length > 0) {
+        // calculate midpoint
+        let centreX = 0;
+        let centreY = 0;
+        let halfWidth = cellSL * 0.5;
+        for ( let cell of cells ) {
+          centreX += cell.x + halfWidth;
+          centreY += cell.y + halfWidth;
+        }
+        centreX /= cells.length;
+        centreY /= cells.length;
+
         ctx.beginPath();
         ctx.arc(centreX,centreY,radius,0,2*Math.PI,false);
         ctx.fill();
