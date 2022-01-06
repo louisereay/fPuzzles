@@ -27,7 +27,7 @@
   const clockLineName = 'Clock';
   const weakPalindromeName = 'Weak Palindrome';
   const antiPalindromeName = 'AntiPalindrome';
-  const sweeperCellName = 'SweeperCell';
+  const sweeperCellName = 'Sweeper Cell';
 
   const newLineConstraintInfo = [{
     name: clockLineName,
