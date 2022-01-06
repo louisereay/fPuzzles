@@ -587,7 +587,11 @@ const doShim = function() {
     this.addCellToLine = function(cell) {
       this.lines[this.lines.length - 1].push(cell);
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> dd1d943d8e116d1078a561f3cc6be70f71aa6cc4
 }
   // Sweeper Cell
   window.sweepercell = function(cells) {
