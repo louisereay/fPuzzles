@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Fpuzzles-PallandoConstraintsAntiPalindrome
+// @name         Fpuzzles-PallandoConstraints
 // @namespace    http://tampermonkey.net/
 // @version      1.12
 // @description  Adds Clockline, Weak Palindrome Line, anti-palindrome and Sweepercell constraints to Fpuzzles
@@ -27,7 +27,7 @@
   const clockLineName = 'Clock';
   const weakPalindromeName = 'Weak Palindrome';
   const antiPalindromeName = 'AntiPalindrome';
-  const sweeperCellName = 'SweeperCell';
+  const sweeperCellName = 'Sweeper Cell';
 
   const newLineConstraintInfo = [{
     name: clockLineName,
