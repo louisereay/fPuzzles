@@ -67,6 +67,7 @@ const newCellConstraintInfo = [{
     "The digit inside a sweeper square says how many of digits within a king's ",
     'move of it (including itself) match the condition the square is labeled with.',
     'Type a number to add a constraint type:',
+    '[example ranges are for 9x9 grids. Other grid sizes will adjust valid numbers as appropriate]',
     '',
     ' 1: Doubles (1248)   2: Evens (2468)    3: Fibonacci (12358)',
     ' 4: Highs (56789)    5: Lows (1234)      6: Odds (13579)',
@@ -280,28 +281,74 @@ const doShim = function() {
 
     // helper functions
     const getValidDigits = function(sweeperType)  {
+      var digit;
+      let validDigits = [];
       switch (sweeperType) {
         case 'E':
-        return [2,4,6,8];
+          digit = 2;
+          while (digit <= size) {
+            validDigits.push(digit);
+            digit += 2;
+          }
+          break;
         case 'F':
-        return [1,2,3,5,8];
+          digit = 1;
+          let digit2 = 2;
+          while (digit  <=  size) {
+            validDigits.push(digit);
+            let temp = digit + digit2;
+            digit = digit2;
+            digit2 = temp;
+          }
+          break;
         case 'H':
-        return [5,6,7,8,9];
+          for (let digit=Math.ceil((size+1)/2);digit<=size;digit++) {
+            validDigits.push(digit);
+          }
+          break;
         case 'L':
-        return [1,2,3,4];
+          for (let digit=1;digit<=Math.floor(size/2);digit++) {
+            validDigits.push(digit);
+          }
+          break;
         case 'O':
-        return [1,3,5,7,9];
+          digit = 1;
+          while (digit <= size) {
+            validDigits.push(digit);
+            digit += 2;
+          }
+          break;
         case 'P':
-        return [2,3,5,7];
+          // Since max size is 16, don't bother calculating primes, just hard code them
+          let primes = [2,3,5,7,11,13];
+          for (let loop=0;loop<primes.length;loop++)
+            if (primes[loop] <= size) validDigits.push(primes[loop]);
+          break;
         case 'S':
-        return [1,4,9];
+          for (let loop = 1; loop <= Math.sqrt(size); loop++)
+            validDigits.push(loop * loop);
+          break;
         case 'T':
-        return [1,3,6];
+          digit = 1;
+          let addDigit = 2;
+          while (digit <= size) {
+            validDigits.push(digit);
+            digit += addDigit;
+            addDigit += 1;
+          }
+          break;
         case 'D':
-        return [1,2,4,8];
+          digit = 1;
+          while (digit <= size) {
+            validDigits.push(digit);
+            digit *= 2;
+          }
+          break;
         default:
-        return [];
+          return [];
       }
+
+      return validDigits;
     }
 
     const isMatch = function(cell,validDigits) {
