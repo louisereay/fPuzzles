@@ -516,7 +516,7 @@ const doShim = function() {
   // Constraint classes
 
   // Clock
-  window['clock'] = function(cell) {
+  window.clock = function(cell) {
     this.lines = [
       [cell]
     ];
@@ -566,6 +566,7 @@ const doShim = function() {
     this.lines = [
       [cell]
     ];
+  }
 
     this.show - function() {
       const antiPalInfo = newConstraintInfo.filter(c => c.name === antiPalindromeName)[0];
