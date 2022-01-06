@@ -311,6 +311,7 @@ const doShim = function() {
           const index = line.indexOf(cell);
           if (index > -1) {
             const mirrorIndex = (line.length - (index + 1));
+            const mirrorCell=line[mirrorIndex];
             if (mirrorCell.value && ((mirrorCell.value + n) != (size + 1)))
               return false;
           }
@@ -587,12 +588,8 @@ const doShim = function() {
     this.addCellToLine = function(cell) {
       this.lines[this.lines.length - 1].push(cell);
     }
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> dd1d943d8e116d1078a561f3cc6be70f71aa6cc4
-}
+  }
   // Sweeper Cell
   window.sweepercell = function(cells) {
     if(cells) {
