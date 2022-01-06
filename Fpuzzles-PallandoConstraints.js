@@ -566,7 +566,7 @@ const doShim = function() {
     this.lines = [
       [cell]
     ];
-  }
+
 
     this.show = function() {
       const antiPalInfo = newConstraintInfo.filter(c => c.name === antiPalindromeName)[0];
@@ -580,10 +580,15 @@ const doShim = function() {
             cells.push(line[Math.ceil((line.length-1)/2)])
           }
           drawDot(cells, antiPalInfo.color, antiPalInfo.colorDark, antiPalInfo.lineWidth);
+        }
       }
     }
-  }
 
+    this.addCellToLine = function(cell) {
+      this.lines[this.lines.length - 1].push(cell);
+    }
+    
+}
   // Sweeper Cell
   window.sweepercell = function(cells) {
     if(cells) {
