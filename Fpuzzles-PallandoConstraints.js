@@ -568,7 +568,7 @@ const doShim = function() {
     ];
   }
 
-    this.show - function() {
+    this.show = function() {
       const antiPalInfo = newConstraintInfo.filter(c => c.name === antiPalindromeName)[0];
       for (var a = 0; a < this.lines.length; a++) {
         const line = this.lines[a];
