@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Fpuzzles-PallandoConstraints
 // @namespace    http://tampermonkey.net/
-// @version      1.11
-// @description  Adds Clockline, Weak Palindrome Line and Sweepercell constraints to Fpuzzles
+// @version      1.13
+// @description  Adds Clockline, Weak Palindrome Line, anti-palindrome and Sweepercell constraints to Fpuzzles
 // @author       Kittiaara
 // @match        https://*.f-puzzles.com/*
 // @match        https://f-puzzles.com/*
@@ -24,9 +24,13 @@
   // 3. Add conflict highlighting logic to candidatePossibleInCell
   // 4. Add a new constraint class (see 'Constraint classes' comment)
 
+  const clockLineName = 'Clock';
+  const weakPalindromeName = 'Weak Palindrome';
+  const antiPalindromeName = 'AntiPalindrome';
+  const sweeperCellName = 'Sweeper Cell';
 
   const newLineConstraintInfo = [{
-    name: 'Clock',
+    name: clockLineName,
     type: 'line',
     color: '#FFD500FE',
     colorDark: '#FFD500FE',
@@ -42,7 +46,7 @@
     constraintType: 'isClockConstraint'
   },
   {
-    name: 'Weak Palindrome',
+    name: weakPalindromeName,
     type: 'lineWithDot',
     color: '#A28CFFFE' ,
     colorDark: '#A28CFFFE',
@@ -55,11 +59,26 @@
       'Shift click and drag to draw overlapping weak palindrome lines.',
     ],
     constraintType: 'isWeakPalindromeConstraint'
+  },
+  {
+    name: antiPalindromeName,
+    type: 'lineWithDot',
+    color: '#FF0000FE',
+    colorDark: '#FF0000FE',
+    lineWidth: 0.25,
+    tooltip: [
+      'corresponding digits sum to the size of the grid + 1. For a 9x9, this would be 10.',
+      '',
+      'Click and drag to draw an anti-palindrome line.',
+      'Click on an anti-palindrome line to remove it.',
+      'Shift click and drag to draw overlapping weak palindrome lines.'
+    ],
+    constraintType: 'isAntiPalindromeConstraint'
   }
 ];
 
 const newCellConstraintInfo = [{
-  name: 'Sweeper Cell',
+  name: sweeperCellName,
   type: 'sweeper',
   color: '#651010FE',
   colorDark: '#FFFFFFFE',
@@ -177,13 +196,20 @@ const doShim = function() {
     // Remove any generated cosmetics
     const puzzle = JSON.parse(compressor.decompressFromBase64(string));
     if (puzzle.line) {
-      puzzle.line = puzzle.line.filter(line => !(line.isClockConstraint || line.isWeakPalindromeConstraint));
+      puzzle.line = puzzle.line.filter(line => !(
+        line.isClockConstraint ||
+        line.isWeakPalindromeConstraint ||
+        line.isAntiPalindromeConstraint)
+      );
       if (puzzle.line.length === 0) {
         delete puzzle.line;
       }
     }
     if (puzzle.circle) {
-      puzzle.circle = puzzle.circle.filter(circle => !circle.isWeakPalindromeConstraint);
+      puzzle.circle = puzzle.circle.filter(circle => !(
+        circle.isWeakPalindromeConstraint ||
+        circle.isAntiPalindromeConstraint)
+      );
       if (puzzle.circle.length === 0) {
         delete puzzle.circle;
       }
@@ -236,7 +262,7 @@ const doShim = function() {
     }
 
     // Clock
-    const constraintsClock = constraints[cID('Clock')];
+    const constraintsClock = constraints[cID(clockLineName)];
     if (constraintsClock && constraintsClock.length > 0) {
       for (let clock of constraintsClock) {
         for (let line of clock.lines) {
@@ -260,7 +286,7 @@ const doShim = function() {
     }
 
     // Weak Palindrome
-    const constraintsWPal = constraints[cID('Weak Palindrome')];
+    const constraintsWPal = constraints[cID(weakPalindromeName)];
     if (constraintsWPal && constraintsWPal.length > 0) {
       for (let wpal of constraintsWPal) {
         for (let line of wpal.lines) {
@@ -272,6 +298,22 @@ const doShim = function() {
             if (mirrorCell.value && (((n % 2) != (mirrorCell.value % 2)) || ( (Math.floor(n / border)) != (Math.floor(mirrorCell.value / border)) ))) {
               return false;
             }
+          }
+        }
+      }
+    }
+
+    // Anti-Palindrome
+    const constraintsAntiPal = constraints[cID(antiPalindromeName)];
+    if (constraintsAntiPal && constraintsAntiPal.length > 0) {
+      for (let aPal of constraintsAntiPal) {
+        for (let line of aPal.lines) {
+          const index = line.indexOf(cell);
+          if (index > -1) {
+            const mirrorIndex = (line.length - (index + 1));
+            const mirrorCell=line[mirrorIndex];
+            if (mirrorCell.value && ((mirrorCell.value + n) != (size + 1)))
+              return false;
           }
         }
       }
@@ -382,7 +424,7 @@ const doShim = function() {
       return true;
     }
 
-    const constraintsSCell = constraints[cID('Sweeper Cell')];
+    const constraintsSCell = constraints[cID(sweeperCellName)];
     if (constraintsSCell  && constraintsSCell.length > 0)  {
       for (let scell of constraintsSCell)  {
         if (scell && (scell.cell===cell) && scell.cell.value && scell.value) {
@@ -434,12 +476,16 @@ const doShim = function() {
     ctx.fill();
   }
 
-  const drawDot = function(cells, color, colorDark, lineWidth) {
+  const drawDottedLine = function(line, cells, color, colorDark, lineWidth) {
     const radius = cellSL * lineWidth * 0.25;
-    // calculate midpoint
-    let centreX = 0;
-    let centreY = 0;
+
+    drawLine(line, color, colorDark, lineWidth);
+
+    // Draw dot
     if (cells.length > 0) {
+      // calculate midpoint
+      let centreX = 0;
+      let centreY = 0;
       let halfWidth = cellSL * 0.5;
       for ( let cell of cells ) {
         centreX += cell.x + halfWidth;
@@ -447,14 +493,12 @@ const doShim = function() {
       }
       centreX /= cells.length;
       centreY /= cells.length;
-    }
 
-    ctx.fillStyle =  boolSettings['Dark Mode']? colorDark : color;
-    ctx.strokeStyle = boolSettings['Dark Mode']? colorDark : color;
-    ctx.beginPath();
-    ctx.arc(centreX,centreY,radius,0,2*Math.PI,false);
-    ctx.fill();
-    ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(centreX,centreY,radius,0,2*Math.PI,false);
+      ctx.fill();
+      ctx.stroke();
+    }
   }
 
   const drawSweep = function(cell, color, colorDark, value) {
@@ -475,13 +519,13 @@ const doShim = function() {
   // Constraint classes
 
   // Clock
-  window['clock'] = function(cell) {
+  window.clock = function(cell) {
     this.lines = [
       [cell]
     ];
 
     this.show = function() {
-      const clockInfo = newConstraintInfo.filter(c => c.name === 'Clock')[0];
+      const clockInfo = newConstraintInfo.filter(c => c.name === clockLineName)[0];
       for (var a = 0; a < this.lines.length; a++) {
         drawLine(this.lines[a], clockInfo.color, clockInfo.colorDark, clockInfo.lineWidth);
       }
@@ -500,18 +544,17 @@ const doShim = function() {
     ];
 
     this.show = function() {
-      const wpalInfo = newConstraintInfo.filter(c => c.name === 'Weak Palindrome')[0];
+      const wpalInfo = newConstraintInfo.filter(c => c.name === weakPalindromeName)[0];
       for (var a = 0; a < this.lines.length; a++) {
         const line = this.lines[a];
-        drawLine(line, wpalInfo.color, wpalInfo.colorDark, wpalInfo.lineWidth);
+        let cells = [];
         if (line.length > 1) {
-          // draw a dot at the midpoint of the line
-          let cells = [ line[Math.floor((line.length-1)/2)] ];
+          cells.push(line[Math.floor((line.length-1)/2)]);
           if ((line.length%2)==0) {
             cells.push(line[Math.ceil((line.length-1)/2)])
           }
-          drawDot(cells, wpalInfo.color, wpalInfo.colorDark, wpalInfo.lineWidth);
         }
+        drawDottedLine(line, cells, wpalInfo.color, wpalInfo.colorDark, wpalInfo.lineWidth);
       }
     }
 
@@ -520,6 +563,33 @@ const doShim = function() {
     }
   }
 
+  // AntiPalindrome
+  window.antipalindrome = function(cell) {
+    this.lines = [
+      [cell]
+    ];
+
+
+    this.show = function() {
+      const antiPalInfo = newConstraintInfo.filter(c => c.name === antiPalindromeName)[0];
+      for (var a = 0; a < this.lines.length; a++) {
+        const line = this.lines[a];
+        let cells  = [];
+        if (line.length > 1) {
+          cells.push(line[Math.floor((line.length-1)/2)]);
+          if ((line.length%2)==0) {
+            cells.push(line[Math.ceil((line.length-1)/2)])
+          }
+          drawDottedLine(line, cells, antiPalInfo.color, antiPalInfo.colorDark, antiPalInfo.lineWidth);
+        }
+      }
+    }
+
+    this.addCellToLine = function(cell) {
+      this.lines[this.lines.length - 1].push(cell);
+    }
+
+  }
   // Sweeper Cell
   window.sweepercell = function(cells) {
     if(cells) {
@@ -528,7 +598,7 @@ const doShim = function() {
     }
 
     this.show = function() {
-      const sCellInfo = newConstraintInfo.filter(c => c.name === 'Sweeper Cell')[0];
+      const sCellInfo = newConstraintInfo.filter(c => c.name === sweeperCellName)[0];
       drawSweep(this.cell,sCellInfo.color,sCellInfo.colorDark,this.value);
     }
 
