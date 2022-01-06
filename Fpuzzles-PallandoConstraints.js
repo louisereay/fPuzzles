@@ -549,7 +549,6 @@ const doShim = function() {
         const line = this.lines[a];
         let cells = [];
         if (line.length > 1) {
-          // draw a dot at the midpoint of the line
           cells.push(line[Math.floor((line.length-1)/2)]);
           if ((line.length%2)==0) {
             cells.push(line[Math.ceil((line.length-1)/2)])
@@ -575,14 +574,13 @@ const doShim = function() {
       const antiPalInfo = newConstraintInfo.filter(c => c.name === antiPalindromeName)[0];
       for (var a = 0; a < this.lines.length; a++) {
         const line = this.lines[a];
-        drawLine(line, antiPalInfo.color, antiPalInfo.colorDark, antiPalInfo.lineWidth);
+        let cells  = [];
         if (line.length > 1) {
-          // draw a dot at the midpoint of the line
-          let cells = [ line[Math.floor((line.length-1)/2)] ];
+          cells.push(line[Math.floor((line.length-1)/2)]);
           if ((line.length%2)==0) {
             cells.push(line[Math.ceil((line.length-1)/2)])
           }
-          drawDot(cells, antiPalInfo.color, antiPalInfo.colorDark, antiPalInfo.lineWidth);
+          drawDottedLine(line, cells, antiPalInfo.color, antiPalInfo.colorDark, antiPalInfo.lineWidth);
         }
       }
     }
