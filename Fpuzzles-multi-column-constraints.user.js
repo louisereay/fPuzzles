@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         FPuzzles-multi-column-constraints
+// @name         Fpuzzles-multi-column-constraints
 // @namespace    http://tampermonkey.net/
 // @version      1.01
 // @description  Implement a multi-column constraints selection box in f-puzzles
