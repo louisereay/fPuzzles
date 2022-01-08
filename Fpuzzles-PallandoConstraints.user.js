@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fpuzzles-PallandoConstraints
 // @namespace    http://tampermonkey.net/
-// @version      1.15
+// @version      1.16
 // @description  Adds Clockline, Weak Palindrome Line, anti-palindrome and Sweepercell constraints to Fpuzzles
 // @author       Kittiaara
 // @match        https://*.f-puzzles.com/*
@@ -233,7 +233,7 @@ const doShim = function() {
   // Draw the new constraints
   const origDrawConstraints = drawConstraints;
   drawConstraints = function(layer) {
-    if (layer === 'Bottom') {
+    if (layer === 'Top') {
       for (let info of newConstraintInfo) {
         const id = cID(info.name);
         const constraint = constraints[id];
