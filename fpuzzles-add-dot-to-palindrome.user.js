@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Fpuzzles-add-dot-to-palindrome
+// @name         FPuzzles-add-dot-to-palindrome
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.01
 // @description  Modifies the inbuilt palindrome line to have a dot marking the midpoint
 // @author       Kittiaara
 // @match        https://*.f-puzzles.com/*
