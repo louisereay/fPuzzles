@@ -28,6 +28,13 @@
   const weakPalindromeName = 'Weak Palindrome';
   const antiPalindromeName = 'AntiPalindrome';
   const sweeperCellName = 'Sweeper Cell';
+  const chineseWhisperName = 'Chinese Whispers';
+
+  const clockLineClass = cID(clockLineName);
+  const weakPalindromeClass = cID(weakPalindromeName);
+  const antiPalindromeClass = cID(antiPalindromeName);
+  const sweeperCellClass = cID(sweeperCellName);
+  const chineseWhisperClass = cID(chineseWhisperName);
 
   const newLineConstraintInfo = [{
     name: clockLineName,
@@ -46,6 +53,21 @@
     constraintType: 'isClockConstraint'
   },
   {
+    name: chineseWhisperName,
+    type: 'line',
+    color: '#2FFF00FE',
+    colorDark: '#2FFF00FE',
+    lineWidth: 0.25,
+    tooltip: [
+      'Adjacent cells on a chinese whispers line contain digits that are either 0 or 1 apart.',
+      '',
+      'Click and drag to draw a clock line.',
+      'Click on a clock line to remove it.',
+      'Shift click and drag to draw overlapping clock lines.',
+    ],
+    constraintType: 'isChineseWhisperConstraint'
+  },
+  {
     name: weakPalindromeName,
     type: 'lineWithDot',
     color: '#A28CFFFE' ,
@@ -58,7 +80,7 @@
       'Click on a weak palindrome line to remove it.',
       'Shift click and drag to draw overlapping weak palindrome lines.',
     ],
-    constraintType: 'isWeakPalindromeConstraint'
+    constraintType: 'isWeakPalindromeConstraint',
   },
   {
     name: antiPalindromeName,
@@ -199,7 +221,8 @@ const doShim = function() {
       puzzle.line = puzzle.line.filter(line => !(
         line.isClockConstraint ||
         line.isWeakPalindromeConstraint ||
-        line.isAntiPalindromeConstraint)
+        line.isAntiPalindromeConstraint ||
+        line.isChineseWhisperConstraint)
       );
       if (puzzle.line.length === 0) {
         delete puzzle.line;
@@ -233,7 +256,7 @@ const doShim = function() {
   // Draw the new constraints
   const origDrawConstraints = drawConstraints;
   drawConstraints = function(layer) {
-    if (layer === 'Top') {
+    if (layer === 'Bottom') {
       for (let info of newConstraintInfo) {
         const id = cID(info.name);
         const constraint = constraints[id];
@@ -277,6 +300,24 @@ const doShim = function() {
             if (index < line.length - 1) {
               const nextCell = line[index + 1];
               if (nextCell.value && ((Math.abs(nextCell.value - n) != 2) && (Math.abs(nextCell.value - n) != (size-2)))) {
+                return false;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Chinese Whispers
+    const constraintsCWhisper = constraints[cID(chineseWhisperName)];
+    if (constraintsCWhisper && constraintsCWhisper.length > 0) {
+      for (let cWhisper of constraintsCWhisper) {
+        for (let line of cWhisper.lines) {
+          const index = line.indexOf(cell);
+          if (index > -1) {
+            if (index > 0) {
+              const prevCell = line[index - 1];
+              if (prevCell.value && ((Math.abs(prevCell.value - n) > 1))) {
                 return false;
               }
             }
@@ -424,7 +465,7 @@ const doShim = function() {
       return true;
     }
 
-    const constraintsSCell = constraints[cID(sweeperCellName)];
+    const constraintsSCell = constraints[sweeperCellClass];
     if (constraintsSCell  && constraintsSCell.length > 0)  {
       for (let scell of constraintsSCell)  {
         if (scell && (scell.cell===cell) && scell.cell.value && scell.value) {
@@ -519,7 +560,7 @@ const doShim = function() {
   // Constraint classes
 
   // Clock
-  window.clock = function(cell) {
+  window[clockLineClass] = function(cell) {
     this.lines = [
       [cell]
     ];
@@ -536,9 +577,30 @@ const doShim = function() {
     }
   }
 
+  // Chinese Whisper
+  window[chineseWhisperClass] = function(cell) {
+    this.lines = [
+      [cell]
+    ];
+
+    this.show = function() {
+      const cWhispInfo =  newConstraintInfo.filter(c => c.name === chineseWhisperName)[0];
+      for (var a = 0; a < this.lines.length; a++) {
+        const line = this.lines[a];
+        drawLine(line, cWhispInfo.color, cWhispInfo.colorDark, cWhispInfo.lineWidth);
+      }
+    }
+
+    this.addCellToLine = function(cell) {
+      this.lines[this.lines.length - 1].push(cell);
+    }
+
+  }
+
+
 
   // Weak Palindrome
-  window.weakpalindrome = function(cell) {
+  window[weakPalindromeClass] = function(cell) {
     this.lines = [
       [cell]
     ];
@@ -564,7 +626,7 @@ const doShim = function() {
   }
 
   // AntiPalindrome
-  window.antipalindrome = function(cell) {
+  window[antiPalindromeClass] = function(cell) {
     this.lines = [
       [cell]
     ];
@@ -591,7 +653,7 @@ const doShim = function() {
 
   }
   // Sweeper Cell
-  window.sweepercell = function(cells) {
+  window[sweeperCellClass] = function(cells) {
     if(cells) {
       this.cell = cells[0];
       this.value = '';
