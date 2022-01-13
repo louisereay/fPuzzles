@@ -256,7 +256,7 @@ const doShim = function() {
   // Draw the new constraints
   const origDrawConstraints = drawConstraints;
   drawConstraints = function(layer) {
-    if (layer === 'Top') {
+    if (layer === 'Bottom') {
       for (let info of newConstraintInfo) {
         const id = cID(info.name);
         const constraint = constraints[id];
