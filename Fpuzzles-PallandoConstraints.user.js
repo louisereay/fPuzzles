@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fpuzzles-PallandoConstraints
 // @namespace    http://tampermonkey.net/
-// @version      1.20
+// @version      1.21
 // @description  Adds Clockline, Weak Palindrome Line, anti-palindrome, chinese whispers and Sweepercell constraints to Fpuzzles
 // @author       Kittiaara
 // @match        https://*.f-puzzles.com/*
@@ -30,11 +30,6 @@
   const sweeperCellName = 'Sweeper Cell';
   const chineseWhisperName = 'Chinese Whispers';
 
-  const clockLineClass = cID(clockLineName);
-  const weakPalindromeClass = cID(weakPalindromeName);
-  const antiPalindromeClass = cID(antiPalindromeName);
-  const sweeperCellClass = cID(sweeperCellName);
-  const chineseWhisperClass = cID(chineseWhisperName);
 
   const newLineConstraintInfo = [{
     name: clockLineName,
@@ -124,6 +119,14 @@ const newCellConstraintInfo = [{
 const newConstraintInfo = [...newLineConstraintInfo, ...newCellConstraintInfo];
 
 const doShim = function() {
+
+  const clockLineClass = cID(clockLineName);
+  const weakPalindromeClass = cID(weakPalindromeName);
+  const antiPalindromeClass = cID(antiPalindromeName);
+  const sweeperCellClass = cID(sweeperCellName);
+  const chineseWhisperClass = cID(chineseWhisperName);
+
+
   // Additional import/export data
   const origExportPuzzle = exportPuzzle;
   exportPuzzle = function(includeCandidates) {
