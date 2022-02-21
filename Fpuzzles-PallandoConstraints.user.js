@@ -485,8 +485,16 @@ const doShim = function() {
               cellI = scell.cell.i + dX;
               cellJ = scell.cell.j + dY;
               if (isInGrid(cellI,cellJ))  {
-                if (isMatch(grid[cellI][cellJ],validDigits)) certainCount++;
-                if (isPossibleMatch(grid[cellI][cellJ],validDigits)) possibleCount++;
+                // JM edit
+                if (constraints[cID('Sweeper Cell')].negative) {
+                  if (dX != 0 || dY != 0) {
+                    if (isMatch(grid[cellI][cellJ],validDigits)) certainCount++;
+                    if (isPossibleMatch(grid[cellI][cellJ],validDigits)) possibleCount++;
+                  }
+                } else {
+                  if (isMatch(grid[cellI][cellJ],validDigits)) certainCount++;
+                  if (isPossibleMatch(grid[cellI][cellJ],validDigits)) possibleCount++;
+                }
               }
             }
           }
@@ -691,6 +699,8 @@ const doShim = function() {
       typableConstraints.push(info.name);
     }
 
+    negativableConstraints.push('Sweeper Cell')
+
     draggableConstraints = [...new Set([...lineConstraints, ...regionConstraints])];
     multicellConstraints = [...new Set([...lineConstraints, ...regionConstraints, ...borderConstraints, ...cornerConstraints])];
     betweenCellConstraints = [...borderConstraints, ...cornerConstraints];
@@ -712,6 +722,8 @@ const doShim = function() {
   for (let info of newConstraintInfo) {
     descriptions[info.name] = info.tooltip;
   }
+
+  descriptions['Sweeper Cell-'] = ['Count does not include the sweeper cell itself.']
 
 }
 
