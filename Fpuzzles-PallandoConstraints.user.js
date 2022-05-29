@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Fpuzzles-PallandoConstraints
-// @version      1.22
+// @version      1.24
 // @namespace    http://tampermonkey.net/
-// @description  Adds Clockline, Weak Palindrome Line, anti-palindrome, chinese whispers and Sweepercell constraints to Fpuzzles
+// @description  Adds Clockline, Weak Palindrome Line, anti-palindrome, chinese whispers, Sweepercell and SumDot constraints to Fpuzzles
 // @author       Kittiaara
 // @match        https://*.f-puzzles.com/*
 // @match        https://f-puzzles.com/*
