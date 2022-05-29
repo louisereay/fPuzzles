@@ -153,14 +153,16 @@
 
   const newConstraintInfo = [...newLineConstraintInfo, ...newCellConstraintInfo, ...newDotConstraintInfo];
 
+  var flaggableConstraints = [];
+
   const doShim = function() {
 
-    const clockLineClass = cID(clockLineName);
-    const weakPalindromeClass = cID(weakPalindromeName);
-    const antiPalindromeClass = cID(antiPalindromeName);
-    const sweeperCellClass = cID(sweeperCellName);
-    const chineseWhisperClass = cID(chineseWhisperName);
-    const sumDotClass = cID(sumDotName);
+  const clockLineClass = cID(clockLineName);
+  const weakPalindromeClass = cID(weakPalindromeName);
+  const antiPalindromeClass = cID(antiPalindromeName);
+  const sweeperCellClass = cID(sweeperCellName);
+  const chineseWhisperClass = cID(chineseWhisperName);
+  const sumDotClass = cID(sumDotName);
 
 
     // Additional import/export data
@@ -168,6 +170,13 @@
     exportPuzzle = function(includeCandidates) {
       const compressed = origExportPuzzle(includeCandidates);
       const puzzle = JSON.parse(compressor.decompressFromBase64(compressed));
+
+      // Move flags from negative to pallandoflags
+      if (puzzle.negative) {
+        puzzle.pallandoflags = puzzle.negative.filter(neg=>(flaggableConstraints.indexOf(neg)>-1));
+        puzzle.negative = puzzle.negative.filter(neg=>(flaggableConstraints.indexOf(neg)<0));
+        if (puzzle.negative.length===0) {delete puzzle.negative;}
+      }
 
       // Add cosmetic version of constraints for those not using the solver plugin
       for (let constraintInfo of newConstraintInfo) {
@@ -257,11 +266,15 @@
             if (!puzzle.text) {
               puzzle.text = [];
             }
+            let colour = constraintInfo.color;
+            if (constraints[sumDotClass].negative) {
+              colour = constraintInfo.modalcolor;
+            }
             for (let instance of puzzleEntry) {
               const circleText = {
                 "cells": instance.cells,
                 "baseC": "#FFFFFFFE",
-                "outlineC": constraintInfo.color,
+                "outlineC": colour,
                 "fontC": "#000000FE",
                 "width": "0.35",
                 "height": "0.35"
@@ -269,8 +282,8 @@
               circleText[constraintInfo.constraintType] = true;
               const rectangleText = {
                 "cells": instance.cells,
-                "baseC": constraintInfo.color,
-                "outlineC": constraintInfo.color,
+                "baseC": colour,
+                "outlineC": colour,
                 "fontC": "#000000FE",
                 "width": "0.35",
                 "height": "0.35",
@@ -296,8 +309,14 @@
 
     const origImportPuzzle = importPuzzle;
     importPuzzle = function(string, clearHistory) {
-      // Remove any generated cosmetics
       const puzzle = JSON.parse(compressor.decompressFromBase64(string));
+      // translate flagged to negativableConstraints
+      if (puzzle.pallandoflags) {
+        if (!puzzle.negative) {puzzle.negative = [];}
+        for (let flag of puzzle.pallandoflags) {puzzle.negative.push(flag.name);}
+        delete puzzle.pallandoflags;
+      }
+      // Remove any generated cosmetics
       if (puzzle.line) {
         puzzle.line = puzzle.line.filter(line => !(
           line.isClockConstraint ||
@@ -576,7 +595,7 @@
                 cellJ = scell.cell.j + dY;
                 if (isInGrid(cellI,cellJ))  {
                   // JM edit
-                  if (constraints[cID('Sweeper Cell')].negative) {
+                  if (constraints[sweeperCellClass].negative) {
                     if (dX != 0 || dY != 0) {
                       if (isMatch(grid[cellI][cellJ],validDigits)) certainCount++;
                       if (isPossibleMatch(grid[cellI][cellJ],validDigits)) possibleCount++;
@@ -883,6 +902,7 @@
       for (let constraint of newConstraintInfo) {
         if (constraint.flagged) {
           negativableConstraints.push(constraint.name);
+          flaggableConstraints.push(cID(constraint.name));
         }
       }
 
