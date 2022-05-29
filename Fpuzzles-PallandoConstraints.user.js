@@ -135,7 +135,6 @@
       type: 'sumdot',
       color: '#AB7D00FE',
       modalcolor: '#007DABFE',
-      colorDark: '#AB7D00FE',
       tooltip: [
         'The number in the dot is the sum of the cells the dot touches.',
         '',
@@ -823,11 +822,11 @@
         ctx.save();
         ctx.lineWidth = lineWT;
         if (constraints[sumDotClass].negative) {
-          ctx.fillStyle = boolSettings['Dark Mode'] ? sDotInfo.colorDark : sDotInfo.modalcolor;
-          ctx.strokeStyle = boolSettings['Dark Mode'] ? sDotInfo.colorDark : sDotInfo.modalcolor;
+          ctx.fillStyle = sDotInfo.modalcolor;
+          ctx.strokeStyle = sDotInfo.modalcolor;
         } else {
-          ctx.fillStyle = boolSettings['Dark Mode'] ? sDotInfo.colorDark : sDotInfo.color;
-          ctx.strokeStyle = boolSettings['Dark Mode'] ? sDotInfo.colorDark : sDotInfo.color;
+          ctx.fillStyle = sDotInfo.color;
+          ctx.strokeStyle = sDotInfo.color;
         }
         ctx.translate(this.x(),this.y());
         ctx.rotate(Math.PI/4);
@@ -839,7 +838,7 @@
         ctx.arc(0,0,radius,0,2*Math.PI,false);
         ctx.fill();
         ctx.stroke();
-        ctx.fillStyle = boolSettings['Dark Mode'] ? "#FFFFFFFE" : "#000000FE";
+        ctx.fillStyle = "#000000FE";
         ctx.textAlign = 'center';
         ctx.font = (cellSL * 0.8 * 0.35) + 'px Arial';
     		ctx.fillText(this.value.length ? this.value : '-', 0, cellSL * 0.3 * 0.35);
