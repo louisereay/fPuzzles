@@ -201,7 +201,7 @@
         if (puzzle.negative.length===0) {delete puzzle.negative;}
       }
 
-      // Add cosmetic version of constraints for those not using the solver plugin
+      // Add cosmetic version of constraints for those not using the script
       for (let constraintInfo of newConstraintInfo) {
         const id = cID(constraintInfo.name);
         const puzzleEntry = puzzle[id];
@@ -216,9 +216,15 @@
                 "outlineC": "#00000002",
                 "fontC": constraintInfo.color,
               };
+              let classname = cID(constraintInfo.name);
+              let baseC = "#FFFFFF00";
+              if (constraints[classname].negative) {
+                baseC = constraintInfo.color.substring(0,7) + '44';
+              }
+
               let rectangleText =  {
                 "cells": [instance.cell],
-                "baseC": "#FFFFFF00",
+                "baseC": baseC,
                 "outlineC": constraintInfo.color,
                 "fontC": constraintInfo.color,
                 "width": 0.85,
@@ -373,7 +379,7 @@
       if (puzzle.rectangle) {
         puzzle.rectangle = puzzle.rectangle.filter(rectangle => !(
           rectangle.isSumDotConstraint ||
-          rectangle.isSweeperCell)
+          rectangle.isSweeperCellConstraint)
         );
         if (puzzle.rectangle.length === 0) {
           delete puzzle.rectangle;
@@ -745,12 +751,18 @@
       }
     }
 
-    const drawSweep = function(cell, color, colorDark, value) {
+    const drawSweep = function(cell, color, colorDark, value, flagged) {
       let startX = cell.x + (cellSL*.075);
       let startY = cell.y + (cellSL*.075);
       ctx.lineWidth = lineWT;
       ctx.strokeStyle = boolSettings['Dark Mode'] ? colorDark : color;
+      let background = "#FFFFFF00";
+      if (flagged) {
+        background = (boolSettings['Dark Mode'] ? colorDark : color).substring(0, 7) + '30';
+      }
+      ctx.fillStyle = background;
       ctx.strokeRect(startX, startY, cellSL*.85, cellSL*.85);
+      ctx.fillRect(startX, startY, cellSL*.85, cellSL*.85);
       ctx.fillStyle = boolSettings['Dark Mode'] ? colorDark : color;
       ctx.font = (cellSL * 0.2) + 'px Verdana';
       ctx.textAlign = 'center';
@@ -859,7 +871,7 @@
 
       this.show = function() {
         const sCellInfo = newConstraintInfo.filter(c => c.name === sweeperCellName)[0];
-        drawSweep(this.cell,sCellInfo.color,sCellInfo.colorDark,this.value);
+        drawSweep(this.cell,sCellInfo.color,sCellInfo.colorDark,this.value,constraints[sweeperCellClass].negative);
       }
 
       this.typeNumber = function(num){
