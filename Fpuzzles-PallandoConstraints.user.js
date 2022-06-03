@@ -219,7 +219,7 @@
               let classname = cID(constraintInfo.name);
               let baseC = "#FFFFFF00";
               if (constraints[classname].negative) {
-                baseC = constraintInfo.color.substring(0,7) + '44';
+                baseC = constraintInfo.color.substring(0,7) + '30';
               }
 
               let rectangleText =  {
@@ -910,7 +910,7 @@
       ctx.fillStyle = "#000000FE";
       ctx.textAlign = 'center';
       ctx.font = (cellSL * 0.8 * 0.35) + 'px Arial';
-      ctx.fillText(sumDot.value.length ? sumDot.value : '-', 0, cellSL * 0.3 * 0.35);
+      ctx.fillText(sumDot.value.length ? sumDot.value : ' ', 0, cellSL * 0.3 * 0.35);
       ctx.restore();
 
     }
