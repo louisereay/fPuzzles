@@ -37,8 +37,8 @@
     {
       name: clockLineName,
       type: 'line',
-      color: '#FFD500FE',
-      colorDark: '#FFD500FE',
+      color: '#FFD500',
+      colorDark: '#FFD500',
       lineWidth: 0.25,
       tooltip: [
         'Adjacent cells on a clock line contain digits that are 2 hours apart on a clock going from 1 to 9',
@@ -54,8 +54,8 @@
     {
       name: chineseWhisperName,
       type: 'line',
-      color: '#2FFF00FE',
-      colorDark: '#2FFF00FE',
+      color: '#2FFF00',
+      colorDark: '#2FFF00',
       lineWidth: 0.25,
       tooltip: [
         'Adjacent cells on a chinese whispers line contain digits that are either 0 or 1 apart.',
@@ -70,8 +70,8 @@
     {
       name: weakPalindromeName,
       type: 'lineWithDot',
-      color: '#A28CFFFE' ,
-      colorDark: '#A28CFFFE',
+      color: '#A28CFF' ,
+      colorDark: '#A28CFF',
       lineWidth: 0.25,
       tooltip: [
         'corresponding digits match in both High(56789)-vs-Low(1234) and in Odd(13579)-vs-Even(2468)',
@@ -86,8 +86,8 @@
     {
       name: antiPalindromeName,
       type: 'lineWithDot',
-      color: '#FF0000FE',
-      colorDark: '#FF0000FE',
+      color: '#FF0000',
+      colorDark: '#FF0000',
       lineWidth: 0.25,
       tooltip: [
         'corresponding digits sum to the size of the grid + 1. For a 9x9, this would be 10.',
@@ -105,8 +105,8 @@
     {
       name: sweeperCellName,
       type: 'sweeper',
-      color: '#651010FE',
-      colorDark: '#FFFFFFFE',
+      color: '#651010',
+      colorDark: '#FFFFFF',
       tooltip: [
         "The digit inside a sweeper square says how many of digits within a king's ",
         'move of it (including itself) match the condition the square is labeled with.',
@@ -134,8 +134,8 @@
     {
       name: sumDotName,
       type: 'sumdot',
-      color: '#AB7D00FE',
-      modalcolor: '#007DABFE',
+      color: '#AB7D00',
+      modalcolor: '#007DAB',
       tooltip: [
         'The number in the dot is the sum of the cells the dot touches.',
         '',
@@ -154,8 +154,8 @@
     {
       name: cornerSumDotName,
       type: 'sumdot',
-      color: '#AB7D00FE',
-      modalcolor: '#007DABFE',
+      color: '#AB7D00',
+      modalcolor: '#007DAB',
       tooltip: [
         'The number in the dot is the sum of the cells the dot touches.',
         '',
@@ -303,9 +303,9 @@
             for (let instance of puzzleEntry) {
               const circleText = {
                 "cells": instance.cells,
-                "baseC": "#FFFFFFFE",
+                "baseC": "#FFFFFF",
                 "outlineC": colour,
-                "fontC": "#000000FE",
+                "fontC": "#000000",
                 "width": "0.35",
                 "height": "0.35"
               }
@@ -314,7 +314,7 @@
                 "cells": instance.cells,
                 "baseC": colour,
                 "outlineC": colour,
-                "fontC": "#000000FE",
+                "fontC": "#000000",
                 "width": "0.35",
                 "height": "0.35",
                 "angle": "45"
@@ -323,7 +323,7 @@
               const textText = {
                 "cells": instance.cells,
                 "value": instance.value,
-                "fontC": "#000000FE",
+                "fontC": "#000000",
                 "size": "0.35"
               }
               textText[constraintInfo.constraintType] = true;
@@ -902,12 +902,12 @@
       let side=cellSL * 0.35;
       ctx.fillRect(-side/2,-side/2,side,side);
       ctx.rotate(-Math.PI/4);
-      ctx.fillStyle = "#FFFFFFFE";
+      ctx.fillStyle = "#FFFFFF";
       ctx.beginPath();
       ctx.arc(0,0,radius,0,2*Math.PI,false);
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = "#000000FE";
+      ctx.fillStyle = "#000000";
       ctx.textAlign = 'center';
       ctx.font = (cellSL * 0.8 * 0.35) + 'px Arial';
       ctx.fillText(sumDot.value.length ? sumDot.value : ' ', 0, cellSL * 0.3 * 0.35);
