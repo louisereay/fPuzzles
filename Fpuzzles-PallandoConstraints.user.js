@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Fpuzzles-PallandoConstraints
-// @version      1.24
+// @version      1.25
 // @namespace    http://tampermonkey.net/
 // @description  Adds Clockline, Weak Palindrome Line, anti-palindrome, chinese whispers, Sweepercell and SumDot constraints to Fpuzzles
 // @author       Kittiaara
@@ -29,15 +29,16 @@
   const antiPalindromeName = 'AntiPalindrome';
   const sweeperCellName = 'Sweeper Cell';
   const chineseWhisperName = 'Chinese Whispers';
-  const sumDotName = 'Sum Dot';
+  const sumDotName = 'Sum Dot (Border)';
+  const cornerSumDotName = 'Sum Dot (Intersection)';
 
 
   const newLineConstraintInfo = [
     {
       name: clockLineName,
       type: 'line',
-      color: '#FFD500FE',
-      colorDark: '#FFD500FE',
+      color: '#FFD500',
+      colorDark: '#FFD500',
       lineWidth: 0.25,
       tooltip: [
         'Adjacent cells on a clock line contain digits that are 2 hours apart on a clock going from 1 to 9',
@@ -53,8 +54,8 @@
     {
       name: chineseWhisperName,
       type: 'line',
-      color: '#2FFF00FE',
-      colorDark: '#2FFF00FE',
+      color: '#2FFF00',
+      colorDark: '#2FFF00',
       lineWidth: 0.25,
       tooltip: [
         'Adjacent cells on a chinese whispers line contain digits that are either 0 or 1 apart.',
@@ -69,8 +70,8 @@
     {
       name: weakPalindromeName,
       type: 'lineWithDot',
-      color: '#A28CFFFE' ,
-      colorDark: '#A28CFFFE',
+      color: '#A28CFF' ,
+      colorDark: '#A28CFF',
       lineWidth: 0.25,
       tooltip: [
         'corresponding digits match in both High(56789)-vs-Low(1234) and in Odd(13579)-vs-Even(2468)',
@@ -85,8 +86,8 @@
     {
       name: antiPalindromeName,
       type: 'lineWithDot',
-      color: '#FF0000FE',
-      colorDark: '#FF0000FE',
+      color: '#FF0000',
+      colorDark: '#FF0000',
       lineWidth: 0.25,
       tooltip: [
         'corresponding digits sum to the size of the grid + 1. For a 9x9, this would be 10.',
@@ -104,8 +105,8 @@
     {
       name: sweeperCellName,
       type: 'sweeper',
-      color: '#651010FE',
-      colorDark: '#FFFFFFFE',
+      color: '#651010',
+      colorDark: '#FFFFFF',
       tooltip: [
         "The digit inside a sweeper square says how many of digits within a king's ",
         'move of it (including itself) match the condition the square is labeled with.',
@@ -133,12 +134,12 @@
     {
       name: sumDotName,
       type: 'sumdot',
-      color: '#AB7D00FE',
-      modalcolor: '#007DABFE',
+      color: '#AB7D00',
+      modalcolor: '#007DAB',
       tooltip: [
         'The number in the dot is the sum of the cells the dot touches.',
         '',
-        'Click to add a sum dot cell.',
+        'Click to add a sum dot then type the assigned sum.',
         'Click on a sum dot to remove it.'
       ],
       constraintType: 'isSumDotConstraint',
@@ -147,6 +148,27 @@
         'Sum is mod [grid size]'
       ],
       typable: true,
+      border: true,
+      constraintLayer: 'Top'
+    },
+    {
+      name: cornerSumDotName,
+      type: 'sumdot',
+      color: '#AB7D00',
+      modalcolor: '#007DAB',
+      tooltip: [
+        'The number in the dot is the sum of the cells the dot touches.',
+        '',
+        'Click to add a sum dot then type the assigned sum.',
+        'Click on a sum dot to remove it.'
+      ],
+      constraintType: 'isSumDotConstraint',
+      flagged: true,
+      flagDescription: [
+        'Sum is mod [grid size]'
+      ],
+      typable: true,
+      corner: true,
       constraintLayer: 'Top'
     }
   ];
@@ -163,6 +185,7 @@
   const sweeperCellClass = cID(sweeperCellName);
   const chineseWhisperClass = cID(chineseWhisperName);
   const sumDotClass = cID(sumDotName);
+  const cornerSumDotClass = cID(cornerSumDotName);
 
 
     // Additional import/export data
@@ -178,7 +201,7 @@
         if (puzzle.negative.length===0) {delete puzzle.negative;}
       }
 
-      // Add cosmetic version of constraints for those not using the solver plugin
+      // Add cosmetic version of constraints for those not using the script
       for (let constraintInfo of newConstraintInfo) {
         const id = cID(constraintInfo.name);
         const puzzleEntry = puzzle[id];
@@ -193,9 +216,15 @@
                 "outlineC": "#00000002",
                 "fontC": constraintInfo.color,
               };
+              let classname = cID(constraintInfo.name);
+              let baseC = "#FFFFFF00";
+              if (constraints[classname].negative) {
+                baseC = constraintInfo.color.substring(0,7) + '30';
+              }
+
               let rectangleText =  {
                 "cells": [instance.cell],
-                "baseC": "#FFFFFF00",
+                "baseC": baseC,
                 "outlineC": constraintInfo.color,
                 "fontC": constraintInfo.color,
                 "width": 0.85,
@@ -267,15 +296,16 @@
               puzzle.text = [];
             }
             let colour = constraintInfo.color;
-            if (constraints[sumDotClass].negative) {
+            let classname = cID(constraintInfo.name);
+            if (constraints[classname].negative) {
               colour = constraintInfo.modalcolor;
             }
             for (let instance of puzzleEntry) {
               const circleText = {
                 "cells": instance.cells,
-                "baseC": "#FFFFFFFE",
+                "baseC": "#FFFFFF",
                 "outlineC": colour,
-                "fontC": "#000000FE",
+                "fontC": "#000000",
                 "width": "0.35",
                 "height": "0.35"
               }
@@ -284,7 +314,7 @@
                 "cells": instance.cells,
                 "baseC": colour,
                 "outlineC": colour,
-                "fontC": "#000000FE",
+                "fontC": "#000000",
                 "width": "0.35",
                 "height": "0.35",
                 "angle": "45"
@@ -293,7 +323,7 @@
               const textText = {
                 "cells": instance.cells,
                 "value": instance.value,
-                "fontC": "#000000FE",
+                "fontC": "#000000",
                 "size": "0.35"
               }
               textText[constraintInfo.constraintType] = true;
@@ -313,7 +343,7 @@
       // translate flagged to negativableConstraints
       if (puzzle.pallandoflags) {
         if (!puzzle.negative) {puzzle.negative = [];}
-        for (let flag of puzzle.pallandoflags) {puzzle.negative.push(flag.name);}
+        for (let flag of puzzle.pallandoflags) {puzzle.negative.push(flag);}
         delete puzzle.pallandoflags;
       }
       // Remove any generated cosmetics
@@ -349,7 +379,7 @@
       if (puzzle.rectangle) {
         puzzle.rectangle = puzzle.rectangle.filter(rectangle => !(
           rectangle.isSumDotConstraint ||
-          rectangle.isSweeperCell)
+          rectangle.isSweeperCellConstraint)
         );
         if (puzzle.rectangle.length === 0) {
           delete puzzle.rectangle;
@@ -616,32 +646,58 @@
       }
 
       // Sum dot
+
+      // helper functions
+
+      const testSumDot  = function(sumDot,newCell,candidate,modal) {
+        // If we don't have a value, then return true (cosmetic dot)
+        if (!sumDot.value || sumDot.value.length===0 ) {
+          return true;
+        }
+
+        let sum = candidate;
+
+        // Process the cells
+        for (let cell of sumDot.cells) {
+          // if there is an empty cell in the group, return true
+          if (!cell.value && (cell != newCell)) {
+            return true;
+          }
+          // Get the sum of existing cells and candidate
+          if (cell != newCell) { sum += cell.value; }
+
+          // If modal, scale to grid size
+          if (modal) {
+            sum %= size;
+            if (sum === 0) {sum = size;}
+          }
+        }
+
+        // test the sum
+        if (parseInt(sumDot.value) === sum) {
+          return true;
+        } else {
+          return false;
+        }
+
+      }
+
       const constraintsSumDot = constraints[sumDotClass];
       if (constraintsSumDot && constraintsSumDot.length > 0) {
+        // loop through all the sumDot's and identify which one we are testing
         for (let sumDot of constraintsSumDot) {
-          // loop through all the sumDot's and identify which one we are testing
-          let cellIndex = sumDot.cells.indexOf(cell);
-          if (cellIndex != -1) {
-            // This is our SumDot, so return false if both numbers exist and
-            // don't sum to the right figure
+          if (sumDot.cells.indexOf(cell) != -1) {
+            return testSumDot(sumDot,cell,n,constraints[sumDotClass].negative);
+          }
+        }
+      }
 
-            // If we don't have a value, then return true (cosmetic dot)
-            if (!sumDot.value || sumDot.value.length===0 ) {
-              return true;
-            }
-            // Get the cell we're not entering into
-            let testCell = sumDot.cells[1-cellIndex];
-            // If that cell has no value, return true
-            if (!testCell.value) { return true;}
-            // get the new sum
-            let sum = testCell.value + n;
-            // mod by size if flagged
-            if (constraints[sumDotClass].negative) {
-              sum %= size;
-              if (sum===0) {sum = size;}
-            }
-            // If the sum and our value don't match, return false
-            if (parseInt(sumDot.value) != sum) {return false;}
+      const constraintsCornerSumDot = constraints[cornerSumDotClass];
+      if (constraintsCornerSumDot && constraintsCornerSumDot.length > 0) {
+        // loop through all the sumDot's and identify which one we are testing
+        for (let sumDot of constraintsCornerSumDot) {
+          if (sumDot.cells.indexOf(cell) != -1) {
+            return testSumDot(sumDot,cell,n,constraints[cornerSumDotClass].negative);
           }
         }
       }
@@ -695,12 +751,18 @@
       }
     }
 
-    const drawSweep = function(cell, color, colorDark, value) {
+    const drawSweep = function(cell, color, colorDark, value, flagged) {
       let startX = cell.x + (cellSL*.075);
       let startY = cell.y + (cellSL*.075);
       ctx.lineWidth = lineWT;
       ctx.strokeStyle = boolSettings['Dark Mode'] ? colorDark : color;
+      let background = "#FFFFFF00";
+      if (flagged) {
+        background = (boolSettings['Dark Mode'] ? colorDark : color).substring(0, 7) + '30';
+      }
+      ctx.fillStyle = background;
       ctx.strokeRect(startX, startY, cellSL*.85, cellSL*.85);
+      ctx.fillRect(startX, startY, cellSL*.85, cellSL*.85);
       ctx.fillStyle = boolSettings['Dark Mode'] ? colorDark : color;
       ctx.font = (cellSL * 0.2) + 'px Verdana';
       ctx.textAlign = 'center';
@@ -809,7 +871,7 @@
 
       this.show = function() {
         const sCellInfo = newConstraintInfo.filter(c => c.name === sweeperCellName)[0];
-        drawSweep(this.cell,sCellInfo.color,sCellInfo.colorDark,this.value);
+        drawSweep(this.cell,sCellInfo.color,sCellInfo.colorDark,this.value,constraints[sweeperCellClass].negative);
       }
 
       this.typeNumber = function(num){
@@ -820,6 +882,39 @@
         }
       }
     }
+
+    // helper function
+    const drawSumDot = function(sumDot,modal) {
+
+      const sDotInfo = newConstraintInfo.filter(c => c.name === sumDotName)[0];
+      const radius = cellSL * 0.175;
+      ctx.save();
+      ctx.lineWidth = lineWT;
+      if (modal) {
+        ctx.fillStyle = sDotInfo.modalcolor;
+        ctx.strokeStyle = sDotInfo.modalcolor;
+      } else {
+        ctx.fillStyle = sDotInfo.color;
+        ctx.strokeStyle = sDotInfo.color;
+      }
+      ctx.translate(sumDot.x(),sumDot.y());
+      ctx.rotate(Math.PI/4);
+      let side=cellSL * 0.35;
+      ctx.fillRect(-side/2,-side/2,side,side);
+      ctx.rotate(-Math.PI/4);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.arc(0,0,radius,0,2*Math.PI,false);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#000000";
+      ctx.textAlign = 'center';
+      ctx.font = (cellSL * 0.8 * 0.35) + 'px Arial';
+      ctx.fillText(sumDot.value.length ? sumDot.value : ' ', 0, cellSL * 0.3 * 0.35);
+      ctx.restore();
+
+    }
+
     // Sum dot
     window[sumDotClass] = function(cells) {
       if (cells) {
@@ -836,33 +931,7 @@
     	}
 
       this.show = function() {
-        const sDotInfo = newConstraintInfo.filter(c => c.name === sumDotName)[0];
-        const radius = cellSL * 0.175;
-        ctx.save();
-        ctx.lineWidth = lineWT;
-        if (constraints[sumDotClass].negative) {
-          ctx.fillStyle = sDotInfo.modalcolor;
-          ctx.strokeStyle = sDotInfo.modalcolor;
-        } else {
-          ctx.fillStyle = sDotInfo.color;
-          ctx.strokeStyle = sDotInfo.color;
-        }
-        ctx.translate(this.x(),this.y());
-        ctx.rotate(Math.PI/4);
-        let side=cellSL * 0.35;
-        ctx.fillRect(-side/2,-side/2,side,side);
-        ctx.rotate(-Math.PI/4);
-        ctx.fillStyle = "#FFFFFFFE";
-        ctx.beginPath();
-        ctx.arc(0,0,radius,0,2*Math.PI,false);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = "#000000FE";
-        ctx.textAlign = 'center';
-        ctx.font = (cellSL * 0.8 * 0.35) + 'px Arial';
-    		ctx.fillText(this.value.length ? this.value : '-', 0, cellSL * 0.3 * 0.35);
-        ctx.restore();
-
+        drawSumDot(this,constraints[sumDotClass].negative);
       }
 
       this.typeNumber = function(num) {
@@ -875,6 +944,37 @@
       }
 
     }
+
+    // Corner Sum dot
+    window[cornerSumDotClass] = function(cells) {
+      if (cells) {
+        this.cells = cells;
+        this.value = '';
+      }
+
+      this.x = function(){
+    		return this.cells.map(a => a.x + cellSL/2).reduce((a, b) => a + b) / this.cells.length;
+    	}
+
+    	this.y = function(){
+    		return this.cells.map(a => a.y + cellSL/2).reduce((a, b) => a + b) / this.cells.length;
+    	}
+
+      this.show = function() {
+        drawSumDot(this,constraints[cornerSumDotClass].negative);
+      }
+
+      this.typeNumber = function(num) {
+        this.value += num.toString(10);
+      }
+
+      this.sortCells = function(){
+        this.cells.sort((a, b) => a.j - b.j);
+        this.cells.sort((a, b) => a.i - b.i);
+      }
+
+    }
+
 
     const origCategorizeTools = categorizeTools;
     categorizeTools = function() {
@@ -894,7 +994,8 @@
       let toolDotIndex = toolConstraints.indexOf('Difference');
       for (let info of newDotConstraintInfo) {
         toolConstraints.splice(++toolDotIndex,0,info.name);
-        borderConstraints.push(info.name);
+        if (info.border) { borderConstraints.push(info.name); }
+        if (info.corner) { cornerConstraints.push(info.name); }
         if (info.typable) { typableConstraints.push(info.name); }
       }
 
@@ -936,8 +1037,8 @@
   if (window.grid) {
   doShim();
   } else {
-  document.addEventListener('DOMContentLoaded', (event) => {
-    doShim();
-  });
-}
-  })();
+    document.addEventListener('DOMContentLoaded', (event) => {
+      doShim();
+    });
+  }
+})();
