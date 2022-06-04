@@ -29,8 +29,8 @@
   const antiPalindromeName = 'AntiPalindrome';
   const sweeperCellName = 'Sweeper Cell';
   const chineseWhisperName = 'Chinese Whispers';
-  const sumDotName = 'Sum Dot';
-  const cornerSumDotName = 'Sum Dot (corner)';
+  const sumDotName = 'Sum Dot (Border)';
+  const cornerSumDotName = 'Sum Dot (Intersection)';
 
 
   const newLineConstraintInfo = [
@@ -139,7 +139,7 @@
       tooltip: [
         'The number in the dot is the sum of the cells the dot touches.',
         '',
-        'Click to add a sum dot cell.',
+        'Click to add a sum dot then type the assigned sum.',
         'Click on a sum dot to remove it.'
       ],
       constraintType: 'isSumDotConstraint',
@@ -159,7 +159,7 @@
       tooltip: [
         'The number in the dot is the sum of the cells the dot touches.',
         '',
-        'Click to add a sum dot cell.',
+        'Click to add a sum dot then type the assigned sum.',
         'Click on a sum dot to remove it.'
       ],
       constraintType: 'isSumDotConstraint',
