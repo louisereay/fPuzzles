@@ -31,6 +31,7 @@
   const chineseWhisperName = 'Chinese Whispers';
   const sumDotName = 'Sum Dot (Border)';
   const cornerSumDotName = 'Sum Dot (Intersection)';
+  const antiquadName = 'Anti-quad Dot';
 
 
   const newLineConstraintInfo = [
@@ -170,6 +171,24 @@
       typable: true,
       corner: true,
       constraintLayer: 'Top'
+    },
+    {
+      name: antiquadName,
+      type: 'antiquad',
+      color: '#000000',
+      fontC: '#FFFFFF',
+      tooltip: [
+        'Numbers that appear in the dot may not appear in any surrounding',
+        'cells',
+        '',
+        'Click to add an anti-quad dot, then type excluded numbers.',
+        'Click on an anti-quad to remove it.'
+      ],
+      constraintType: 'isAntiQuadConstraint',
+      flagged: false,
+      typable: true,
+      corner: true,
+      constraintLayer: 'Top'
     }
   ];
 
@@ -186,6 +205,7 @@
   const chineseWhisperClass = cID(chineseWhisperName);
   const sumDotClass = cID(sumDotName);
   const cornerSumDotClass = cID(cornerSumDotName);
+  const antiquadClass = cID(antiquadName);
 
 
     // Additional import/export data
@@ -285,7 +305,7 @@
               puzzle.circle.push(circleText);
             }
           }
-          if (constraintInfo.type ==='sumdot') {
+          if (constraintInfo.type === 'sumdot') {
             if (!puzzle.circle) {
               puzzle.circle = [];
             }
@@ -332,6 +352,30 @@
               puzzle.text.push(textText);
             }
           }
+          if (constraintInfo.type === 'antiquad') {
+            if (!puzzle.circle) {
+              puzzle.circle = [];
+            }
+            let color = constraintInfo.color;
+            let classname = cID(constraintInfo.name);
+            for (let instance of puzzleEntry) {
+              let valueText = "";
+              for (let value of instance.values) {
+                valueText += value.toString(10);
+              }
+              const circleText = {
+                "cells": instance.cells,
+                "baseC": constraintInfo.color,
+                "outlineC": constraintInfo.color,
+                "fontC": constraintInfo.fontC,
+                "value": valueText,
+                "width": "0.5",
+                "height": "0.5"
+              }
+              circleText[constraintInfo.constraintType] = true;
+              puzzle.circle.push(circleText);
+            }
+          }
         }
       }
       return compressor.compressToBase64(JSON.stringify(puzzle));
@@ -362,7 +406,8 @@
         puzzle.circle = puzzle.circle.filter(circle => !(
           circle.isWeakPalindromeConstraint ||
           circle.isAntiPalindromeConstraint ||
-          circle.isSumDotConstraint
+          circle.isSumDotConstraint ||
+          circle.isAntiQuadConstraint
         ));
         if (puzzle.circle.length === 0) {
           delete puzzle.circle;
@@ -702,6 +747,18 @@
         }
       }
 
+      // Anti-Quad Dot
+
+      const constraintsAntiQuad = constraints[antiquadClass];
+      if (constraintsAntiQuad && constraintsAntiQuad.length > 0) {
+        // loop through all the Anti-Quad Dot's and identify which one we are testing
+        for (let antiquad of constraintsAntiQuad) {
+          if (antiquad.cells.indexOf(cell) != -1) {
+            return antiquad.values.indexOf(n) === -1;
+          }
+        }
+      }
+
       return true;
     }
 
@@ -770,6 +827,37 @@
       ctx.fillText(value, cell.x + (cellSL * 0.5), cell.y + (cellSL * 0.85));
       ctx.fillText(value, cell.x + (cellSL * 0.18), cell.y + (cellSL * 0.55));
       ctx.fillText(value, cell.x + (cellSL * 0.82), cell.y + (cellSL * 0.55));
+    }
+
+    const drawSumDot = function(sumDot,modal) {
+
+      const sDotInfo = newConstraintInfo.filter(c => c.name === sumDotName)[0];
+      const radius = cellSL * 0.175;
+      ctx.save();
+      ctx.lineWidth = lineWT;
+      if (modal) {
+        ctx.fillStyle = sDotInfo.modalcolor;
+        ctx.strokeStyle = sDotInfo.modalcolor;
+      } else {
+        ctx.fillStyle = sDotInfo.color;
+        ctx.strokeStyle = sDotInfo.color;
+      }
+      ctx.translate(sumDot.x(),sumDot.y());
+      ctx.rotate(Math.PI/4);
+      let side=cellSL * 0.35;
+      ctx.fillRect(-side/2,-side/2,side,side);
+      ctx.rotate(-Math.PI/4);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.arc(0,0,radius,0,2*Math.PI,false);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#000000";
+      ctx.textAlign = 'center';
+      ctx.font = (cellSL * 0.8 * 0.35) + 'px Arial';
+      ctx.fillText(sumDot.value.length ? sumDot.value : ' ', 0, cellSL * 0.3 * 0.35);
+      ctx.restore();
+
     }
 
     // Constraint classes
@@ -882,39 +970,6 @@
         }
       }
     }
-
-    // helper function
-    const drawSumDot = function(sumDot,modal) {
-
-      const sDotInfo = newConstraintInfo.filter(c => c.name === sumDotName)[0];
-      const radius = cellSL * 0.175;
-      ctx.save();
-      ctx.lineWidth = lineWT;
-      if (modal) {
-        ctx.fillStyle = sDotInfo.modalcolor;
-        ctx.strokeStyle = sDotInfo.modalcolor;
-      } else {
-        ctx.fillStyle = sDotInfo.color;
-        ctx.strokeStyle = sDotInfo.color;
-      }
-      ctx.translate(sumDot.x(),sumDot.y());
-      ctx.rotate(Math.PI/4);
-      let side=cellSL * 0.35;
-      ctx.fillRect(-side/2,-side/2,side,side);
-      ctx.rotate(-Math.PI/4);
-      ctx.fillStyle = "#FFFFFF";
-      ctx.beginPath();
-      ctx.arc(0,0,radius,0,2*Math.PI,false);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = "#000000";
-      ctx.textAlign = 'center';
-      ctx.font = (cellSL * 0.8 * 0.35) + 'px Arial';
-      ctx.fillText(sumDot.value.length ? sumDot.value : ' ', 0, cellSL * 0.3 * 0.35);
-      ctx.restore();
-
-    }
-
     // Sum dot
     window[sumDotClass] = function(cells) {
       if (cells) {
@@ -944,7 +999,6 @@
       }
 
     }
-
     // Corner Sum dot
     window[cornerSumDotClass] = function(cells) {
       if (cells) {
@@ -973,6 +1027,56 @@
         this.cells.sort((a, b) => a.i - b.i);
       }
 
+    }
+    // Anti-Quad dot
+    window[antiquadClass] = function(cells) {
+      if (cells) {
+        this.cells = cells;
+      }
+
+      this.values = [];
+
+      this.x = function(){
+    		return (this.cells[0].x + this.cells[3].x) / 2 + cellSL/2;
+    	}
+
+    	this.y = function(){
+    		return (this.cells[0].y + this.cells[3].y) / 2 + cellSL/2;
+    	}
+
+    	this.show = function(){
+        const antiQuadInfo = newConstraintInfo.filter(c => c.name === antiquadName)[0];
+    		ctx.lineWidth = lineWT;
+    		ctx.fillStyle = antiQuadInfo.color;
+    		ctx.strokeStyle = antiQuadInfo.color;
+    		ctx.beginPath();
+    		ctx.arc(this.x(), this.y(), cellSL * 0.25, 0, Math.PI*2);
+    		ctx.fill();
+    		ctx.stroke();
+
+    		ctx.fillStyle = antiQuadInfo.fontC;
+    		ctx.font = (cellSL * 0.185) + 'px Arial';
+    		if(this.values.length <= 2)
+    			ctx.fillText(this.values.join(''), this.x(), this.y() + (cellSL * 0.06789));
+    		else {
+    			ctx.fillText(this.values.slice(0, 2).join(' '), this.x(), this.y() + (cellSL * -0.02211));
+    			ctx.fillText(this.values.slice(2, Infinity).join(' '), this.x(), this.y() + (cellSL * 0.15789));
+    		}
+    	}
+
+    	this.sortCells = function(){
+    		this.cells.sort((a, b) => a.j - b.j);
+    		this.cells.sort((a, b) => a.i - b.i);
+    	}
+
+    	this.typeNumber = function(num){
+    		if(num > 0 && this.values.length < 4){
+    			if(this.values.indexOf(num) === this.values.lastIndexOf(num)){
+    				this.values.push(num);
+    				this.values.sort();
+    			}
+    		}
+    	}
     }
 
 
