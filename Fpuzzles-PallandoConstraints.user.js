@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Fpuzzles-PallandoConstraints
-// @version      1.25
+// @version      1.26
 // @namespace    http://tampermonkey.net/
 // @description  Adds Clockline, Weak Palindrome Line, anti-palindrome, chinese whispers, Sweepercell and SumDot constraints to Fpuzzles
 // @author       Kittiaara
@@ -910,7 +910,7 @@
       ctx.fillStyle = "#000000";
       ctx.textAlign = 'center';
       ctx.font = (cellSL * 0.8 * 0.35) + 'px Arial';
-      ctx.fillText(sumDot.value.length ? sumDot.value : ' ', 0, cellSL * 0.3 * 0.35);
+      ctx.fillText(sumDot.value ? sumDot.value : ' ', 0, cellSL * 0.3 * 0.35);
       ctx.restore();
 
     }
