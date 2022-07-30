@@ -489,7 +489,7 @@
             const index = line.indexOf(cell);
             if (index > -1) {
               const mirrorIndex = ( line.length - (index + 1));
-              const border = Math.ceil(size/2);
+              const border = Math.floor(size/2) + 1;
               const mirrorCell=line[mirrorIndex];
               if (mirrorCell.value && (((n % 2) != (mirrorCell.value % 2)) || ( (Math.floor(n / border)) != (Math.floor(mirrorCell.value / border)) ))) {
                 return false;
